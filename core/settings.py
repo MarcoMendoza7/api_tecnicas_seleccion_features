@@ -16,17 +16,29 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECRET_KEY: Obligatorio en Render
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "default-insecure-key-para-desarrollo")
 # DEBUG: Debe ser False en producción (Render)
-DEBUG = (
-    os.environ.get("DJANGO_DEBUG", "False") == "True"
-)  # ¡Cambiado a False por defecto!
+DEBUG = os.environ.get("DJANGO_DEBUG", "False") == "True"
 
-# ALLOWED_HOSTS: Cargando la lista y añadiendo Render
-ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
+# --- ALLOWED_HOSTS CORREGIDO PARA RENDER ---
+# Definimos una lista base que contiene hosts locales.
+ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+
+# Si la variable de entorno DJANGO_ALLOWED_HOSTS existe, añadimos sus valores.
+env_hosts = os.environ.get("DJANGO_ALLOWED_HOSTS")
+if env_hosts:
+    # Extendemos la lista con los hosts definidos en la variable de entorno
+    ALLOWED_HOSTS.extend(env_hosts.split(","))
+
 if not DEBUG:
-    # Render siempre usa *.onrender.com
-    ALLOWED_HOSTS.append(".onrender.com")
-
+    # 1. Añadimos el comodín de Render
+    if ".onrender.com" not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append(".onrender.com")
+    
+    # 2. Aseguramos que la URL específica esté allí, resolviendo el DisallowedHost.
+    RENDER_HOST = "api-tecnicas-seleccion-features.onrender.com"
+    if RENDER_HOST not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append(RENDER_HOST)
 # =======================================================
+
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -41,7 +53,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware", # <-- WhiteNoise
     "django.contrib.sessions.middleware.SessionMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -56,7 +68,6 @@ ROOT_URLCONF = "core.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        # RUTA A LA CARPETA 'templates' en la raíz
         "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
@@ -76,18 +87,15 @@ WSGI_APPLICATION = "core.wsgi.application"
 DATABASES = {}
 
 # =======================================================
-# CONFIGURACIÓN CORS (Crucial para el frontend)
+# CONFIGURACIÓN CORS Y SEGURIDAD EN PRODUCCIÓN
 # =======================================================
-# Las variables de entorno son la mejor práctica aquí
-CORS_ALLOW_ALL_ORIGINS = DEBUG  # Permitir todo en DEBUG=True
+CORS_ALLOW_ALL_ORIGINS = DEBUG  
 
 if not DEBUG:
-    # En producción (DEBUG=False), solo permitir orígenes específicos (ej. Render)
     CORS_ALLOWED_ORIGINS = [
-        # La URL de tu servicio web en Render (ej. https://feature-selection-api.onrender.com)
         os.environ.get("CORS_ORIGIN_URL", "https://127.0.0.1")
     ]
-    # Configuraciones de seguridad obligatorias en producción
+    # Configuraciones de seguridad obligatorias
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
@@ -96,29 +104,23 @@ if not DEBUG:
 
 
 # =======================================================
-# CONFIGURACIÓN DE ARCHIVOS ESTÁTICOS Y WHITENOISE (CORREGIDO)
+# CONFIGURACIÓN DE ARCHIVOS ESTÁTICOS Y WHITENOISE
 # =======================================================
-
-# 1. Rutas (Igual para Dev/Prod)
 STATIC_URL = "static/"
-# El directorio donde 'collectstatic' reunirá todos los archivos. ¡Crucial para WhiteNoise!
 STATIC_ROOT = BASE_DIR / "staticfiles"
-# 2. Directorios donde Django buscará archivos estáticos
-# *SOLO* incluimos la carpeta 'static' de la raíz si estamos en desarrollo.
-# WhiteNoise maneja el servir desde STATIC_ROOT.
+
+# Directorio donde Django buscará archivos estáticos creados por ti
 STATICFILES_DIRS = [
-    BASE_DIR / "static",  # Directorio para tus archivos estáticos en la raíz
+    BASE_DIR / "static",
 ]
-# 3. Configuración de WhiteNoise (Usando el nuevo ajuste STORAGES)
+
+# Configuración de WhiteNoise (Usando el nuevo ajuste STORAGES)
 if not DEBUG:
-    # Usamos la nueva forma de configurar el Storage Backend para WhiteNoise
-    # Esto reemplaza WHITENOISE_STORAGE y WHITENOISE_MANIFEST_HETERS
     STORAGES = {
         "staticfiles": {
             "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
         },
     }
-    # ELIMINAR: WHITENOISE_MANIFEST_HETERS y WHITENOISE_STORAGE son obsoletos con STORAGES
 
 # =======================================================
 
