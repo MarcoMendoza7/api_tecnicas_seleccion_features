@@ -1,3 +1,4 @@
+pip==25.3
 asgiref==3.3.4
 asttokens==3.0.0
 black==25.9.0
@@ -51,7 +52,7 @@ nest-asyncio==1.6.0
 nodeenv==1.9.1
 numpy==1.26.4
 packaging==23.2
-pandas==2.1.4
+pandas==2.0.3
 parso==0.8.5
 pathspec==0.12.1
 pexpect==4.9.0
@@ -95,3 +96,4 @@ urllib3==1.26.18
 virtualenv==20.35.4
 wcwidth==0.2.14
 whitenoise==6.11.0
+--only-binary=:all:
