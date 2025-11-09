@@ -3,6 +3,8 @@
 # ==================================
 .env
 .env.*
+.env copy.*
+.env copy
 *.pyenv # Archivos de variables de entorno (ocultos o específicos)
 gc_credentials.json # Archivos de credenciales de Google Cloud
 tecnicas.json
