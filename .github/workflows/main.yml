@@ -1,0 +1,52 @@
+name: Python CI - Style & Tests
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  validate:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1.- Clonar el repo
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # 2.- Configurar Python
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.12"
+
+      # 3️.- Instalar dependencias
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install flake8 black pytest
+
+      # 4️.- Linter con flake8
+      - name: Run Flake8 (Linting)
+        run: |
+          echo "Running flake8 to detect syntax errors and bad practices..."
+          # Reglas para errores fatales (E9, F63, F7, F82)
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          # Reglas para estilo y complejidad, sin fallar el workflow
+          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+      # 5️.- Verificar formato con Black
+      - name: Run Black (Formatting check)
+        run: |
+          echo "Checking code format with Black..."
+          # --check solo verifica, no aplica cambios
+          black --check .
+
+      # 6️.- Ejecutar tests con pytest
+      - name: Run tests
+        run: |
+          echo "Running tests with pytest..."
+          pytest

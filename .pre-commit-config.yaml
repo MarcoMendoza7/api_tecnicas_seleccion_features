@@ -1,0 +1,26 @@
+repos:
+  # Hooks comunes de pre-commit
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace   # Elimina espacios en blanco al final de las líneas
+      - id: end-of-file-fixer     # Asegura una línea nueva al final de cada archivo
+      - id: check-yaml
+      - id: check-json
+      
+  # Herramientas de formateo y linting de Python (ejecución local)
+  - repo: local
+    hooks:
+      # 1. Flake8 (Linting)
+      - id: flake8
+        name: flake8 linter
+        entry: flake8
+        language: system
+        types: [python]
+        
+      # 2. Black (Formatting) - Recomendado para consistencia
+      - id: black
+        name: Black formatter
+        entry: black
+        language: system
+        types: [python]

@@ -1,0 +1,61 @@
+# ==================================
+# 1. Variables de Entorno y Secretos
+# ==================================
+.env
+.env.*
+*.pyenv # Archivos de variables de entorno (ocultos o específicos)
+gc_credentials.json # Archivos de credenciales de Google Cloud
+tecnicas.json
+z.json
+json/
+
+
+
+# ==================================
+# 2. Ambientes Virtuales
+# ==================================
+# Rutas comunes para entornos virtuales (venv, env, .venv)
+venv/
+env/
+.venv/
+Tecnicas_Seleccion_Caracteristicas/
+bin/
+
+
+
+# Ignorar ambientes virtuales basados en Python 
+# (Ej: /Api_Random_Forest/lib/ -> mejor ignorar todo Api_Random_Forest/)
+Api_Random_Forest/ # Si todo tu entorno virtual está aquí
+
+# ==================================
+# 3. Archivos de Python y Compilados
+# ==================================
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+*.so
+
+# ==================================
+# 4. Archivos de Django y BBDD
+# ==================================
+*.log
+*.pot
+*.mo
+*.db
+db.sqlite3
+/staticfiles/ # Archivos estáticos recolectados
+/media/       # Archivos subidos por usuarios
+
+# ==================================
+# 5. Editores y Sistemas Operativos
+# ==================================
+.DS_Store # macOS
+Thumbs.db # Windows
+*.swp     # Vim
+
+# IDEs
+.vscode/ # VS Code
+.idea/   # PyCharm
+
+dataset/
