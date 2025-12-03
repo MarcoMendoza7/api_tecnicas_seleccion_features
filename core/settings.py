@@ -10,35 +10,27 @@ from dotenv import load_dotenv
 load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# =======================================================
-# CONFIGURACIÓN DE SEGURIDAD
-# =======================================================
-# SECRET_KEY: Obligatorio en Render
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "default-insecure-key-para-desarrollo")
 # DEBUG: Debe ser False en producción (Render)
-DEBUG = os.environ.get("DJANGO_DEBUG", "False") == "True"
+DEBUG = (
+    os.environ.get("DJANGO_DEBUG", "False") == "True"
+)  # ¡Cambiado a False por defecto!
 
-# --- ALLOWED_HOSTS CORREGIDO PARA RENDER ---
-# Definimos una lista base que contiene hosts locales.
-ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+# ALLOWED_HOSTS: Cargando la lista de .env y añadiendo los hosts necesarios
+ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
 
-# Si la variable de entorno DJANGO_ALLOWED_HOSTS existe, añadimos sus valores.
-env_hosts = os.environ.get("DJANGO_ALLOWED_HOSTS")
-if env_hosts:
-    # Extendemos la lista con los hosts definidos en la variable de entorno
-    ALLOWED_HOSTS.extend(env_hosts.split(","))
+if DEBUG:
+    # SI ESTÁS EN DESARROLLO (DEBUG=True), PERMITE DOMINIOS DE NGROK
+    # Esto permite cualquier subdominio de ngrok (p. ej., tanja-pseudoviperous-nan.ngrok-free.dev)
+    # ¡Solo usa esto en desarrollo!
+    ALLOWED_HOSTS.append(".ngrok-free.dev")
 
 if not DEBUG:
-    # 1. Añadimos el comodín de Render
-    if ".onrender.com" not in ALLOWED_HOSTS:
-        ALLOWED_HOSTS.append(".onrender.com")
-    
-    # 2. Aseguramos que la URL específica esté allí, resolviendo el DisallowedHost.
-    RENDER_HOST = "api-tecnicas-seleccion-features.onrender.com"
-    if RENDER_HOST not in ALLOWED_HOSTS:
-        ALLOWED_HOSTS.append(RENDER_HOST)
+    # Render siempre usa *.onrender.com
+    ALLOWED_HOSTS.append(".onrender.com")
+    # Asegúrate de que DjangoSettingsModule apunte a este archivo
+    # Y que Render cargue DJANGO_SETTINGS_MODULE=core.settings
 # =======================================================
-
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -52,8 +44,9 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    # Whitenoise debe estar justo después de SecurityMiddleware
     "django.middleware.security.SecurityMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware", # <-- WhiteNoise
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -68,6 +61,7 @@ ROOT_URLCONF = "core.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
+        # RUTA A LA CARPETA 'templates' en la raíz
         "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
@@ -82,46 +76,37 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "core.wsgi.application"
-
 # SIN BASE DE DATOS
 DATABASES = {}
-
 # =======================================================
-# CONFIGURACIÓN CORS Y SEGURIDAD EN PRODUCCIÓN
+# CONFIGURACIÓN CORS (Crucial para el frontend)
 # =======================================================
-CORS_ALLOW_ALL_ORIGINS = DEBUG  
-
-if not DEBUG:
+if DEBUG:
+    # En desarrollo, permitir todo
+    CORS_ALLOW_ALL_ORIGINS = True
+else:
+    # En producción, solo permitir orígenes específicos (ej. Render)
     CORS_ALLOWED_ORIGINS = [
+        # La URL de tu servicio web en Render (ej. https://feature-selection-api.onrender.com)
         os.environ.get("CORS_ORIGIN_URL", "https://127.0.0.1")
     ]
-    # Configuraciones de seguridad obligatorias
-    SECURE_SSL_REDIRECT = True
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
-    # Habilitar el proxy seguro para Render
-    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-
-
-# =======================================================
-# CONFIGURACIÓN DE ARCHIVOS ESTÁTICOS Y WHITENOISE
-# =======================================================
 STATIC_URL = "static/"
-STATIC_ROOT = BASE_DIR / "staticfiles"
-
-# Directorio donde Django buscará archivos estáticos creados por ti
-STATICFILES_DIRS = [
-    BASE_DIR / "static",
-]
-
-# Configuración de WhiteNoise (Usando el nuevo ajuste STORAGES)
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+if DEBUG:
+    # Solo en desarrollo, busca archivos estáticos en la carpeta 'static' de la raíz
+    STATICFILES_DIRS = [
+        BASE_DIR / "static",
+    ]
+else:
+    # En producción, solo usa STATIC_ROOT
+    STATICFILES_DIRS = []
+# Configuración adicional para Whitenoise (compresión y encabezados)
 if not DEBUG:
-    STORAGES = {
-        "staticfiles": {
-            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
-        },
-    }
-
+    # Esto ayuda a servir archivos con encabezados optimizados para caché
+    WHITENOISE_MANIFEST_HETERS = True
+    # Esto habilita la compresión de archivos estáticos
+    WHITENOISE_STORAGE = (
+        "django.contrib.staticfiles.storage.CompressedManifestStaticFilesStorage"
+    )
 # =======================================================
-
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"

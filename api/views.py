@@ -2,12 +2,11 @@
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from django.views.decorators.csrf import csrf_exempt # <-- Importación añadida
 from .ml_module import run_feature_selection
 import os
 from pymongo import MongoClient
 import datetime
-# Eliminadas las importaciones de 'json' y 'method_decorator' que no se usaban
+import json
 
 # --- Función para guardar el log ---
 def save_analysis_log(train_percentage, results):
@@ -18,8 +17,8 @@ def save_analysis_log(train_percentage, results):
             return
 
         client = MongoClient(MONGO_URI)
-        db = client['feature_selection_db']
-        collection = db['analysis_logs']
+        db = client['feature_selection_db']  # Nombre de la BD
+        collection = db['analysis_logs']     # Nombre de la colección
         
         # Construir el documento de log
         log_document = {
@@ -29,6 +28,7 @@ def save_analysis_log(train_percentage, results):
                 "f1_validation": results.get('f1_score_validation'),
                 "top_10_features": results.get('top_10_features_desc'),
             },
+            # Guardar el JSON completo de los resultados
             "full_results": results
         }
         
@@ -36,16 +36,16 @@ def save_analysis_log(train_percentage, results):
         client.close()
         
     except Exception as e:
+        # Esto asegura que el error de logging no detenga la API
         print(f"Error al guardar log en MongoDB: {e}")
 
 
-@csrf_exempt # <------------------------------------------- ¡DESHABILITAR CSRF!
 @api_view(['POST'])
 def feature_selection_api(request):
     """
     Endpoint principal para ejecutar la selección de características y guardar el log.
     """
-    # 1. Obtener y validar el porcentaje
+    # 1. Obtener y validar el porcentaje (Código existente)
     try:
         train_percentage = request.data.get('train_percentage')
         if train_percentage is None:
@@ -61,11 +61,11 @@ def feature_selection_api(request):
     # 2. Ejecutar la lógica de ML
     results = run_feature_selection(train_percentage)
 
-    # 3. Manejar errores del módulo ML (e.g., Error de GCS)
+    # 3. Manejar errores del módulo ML
     if "error" in results:
         return Response(results, status=500)
 
-    # 4. REGISTRO EN MONGODB
+    # 4. 🔥 REGISTRO EN MONGODB (NUEVO PASO) 🔥
     save_analysis_log(train_percentage, results)
     
     # 5. Devolver la respuesta al cliente

@@ -10,6 +10,7 @@ gc_credentials.json # Archivos de credenciales de Google Cloud
 tecnicas.json
 z.json
 json/
+.requirements_2
 
 
 
@@ -22,6 +23,14 @@ env/
 .venv/
 Tecnicas_Seleccion_Caracteristicas/
 bin/
+Entorno_Local_Tecnicas_Seleccion/
+
+#ngrok
+ngrok
+ngrok/
+.ngrok
+.ngrok/
+
 
 
 
