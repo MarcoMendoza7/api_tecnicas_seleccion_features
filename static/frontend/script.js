@@ -20,8 +20,8 @@ document.getElementById('analysis-form').addEventListener('submit', async functi
         // !!!
         // !!! Para pruebas LOCALES (como ahora), usa 127.0.0.1:8000
         // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        const API_URL = 'http://127.0.0.1:8000/api/v1/analyze/'; 
-        
+        const API_URL = 'http://127.0.0.1:8000/api/v1/analyze/';
+
         const response = await fetch(API_URL, {
             method: 'POST',
             headers: {
@@ -60,7 +60,7 @@ function displayResults(results) {
     htmlContent += `
         <h3>Metadatos y Modelo Inicial</h3>
         <p>Tamaño de Sets: ${results.train_size} (Entrenamiento) / ${results.validation_size} (Validación)</p>
-        
+
         <h4>Métricas (Modelo con todas las características):</h4>
         <p><strong>F1 Score de Validación:</strong> <code>${results.f1_score_validation}</code></p>
         <p><strong>F1 Score de Entrenamiento:</strong> <code>${results.f1_score_training}</code></p>
@@ -74,7 +74,7 @@ function displayResults(results) {
         htmlContent += `<li><strong>${feature}</strong></li>`;
     });
     htmlContent += '</ol>';
-    
+
     // --- 3. Modelo Reducido ---
     htmlContent += `
         <hr>
@@ -84,7 +84,7 @@ function displayResults(results) {
         <p class="nota"><em>El rendimiento se mantiene similar, demostrando la eficacia de la selección de características.</em></p>
         <hr>
     `;
-    
+
     // --- 4. Todas las Características (para revisión) ---
     htmlContent += '<h3>Lista Completa de Features = Características (De - a + Importante):</h3>';
     htmlContent += '<ol>';

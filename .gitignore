@@ -1,72 +1,67 @@
-# ==================================
+# ----------------------------------
 # 1. Variables de Entorno y Secretos
-# ==================================
-.env
-.env.*
-.env copy.*
-.env copy
-*.pyenv # Archivos de variables de entorno (ocultos o específicos)
-gc_credentials.json # Archivos de credenciales de Google Cloud
+# ----------------------------------
+# Ignorar todos los archivos de entorno (ej: .env, .env.local, .env copy)
+.env*
+*.pyenv
+
+# Ignorar archivos de credenciales específicos que contienen secretos
+gc_credentials.json
 tecnicas.json
 z.json
 json/
-.requirements_2
 
-
-
-# ==================================
+# ----------------------------------
 # 2. Ambientes Virtuales
-# ==================================
-# Rutas comunes para entornos virtuales (venv, env, .venv)
+# ----------------------------------
+# Entornos virtuales comunes
 venv/
 env/
 .venv/
-Tecnicas_Seleccion_Caracteristicas/
-bin/
-Entorno_Local_Tecnicas_Seleccion/
 
-#ngrok
+# Tu entorno virtual específico
+Tecnicas_Seleccion_Caracteristicas/
+Entorno_Local_Tecnicas_Seleccion/
+Api_Random_Forest/
+
+# Archivos de configuración de ngrok (contiene tokens)
 ngrok
 ngrok/
 .ngrok
 .ngrok/
 
-
-
-
-# Ignorar ambientes virtuales basados en Python 
-# (Ej: /Api_Random_Forest/lib/ -> mejor ignorar todo Api_Random_Forest/)
-Api_Random_Forest/ # Si todo tu entorno virtual está aquí
-
-# ==================================
+# ----------------------------------
 # 3. Archivos de Python y Compilados
-# ==================================
+# ----------------------------------
 *.pyc
 *.pyo
 *.pyd
 __pycache__/
 *.so
 
-# ==================================
+# ----------------------------------
 # 4. Archivos de Django y BBDD
-# ==================================
+# ----------------------------------
+# Archivos de log, estáticos y base de datos local
 *.log
 *.pot
 *.mo
 *.db
 db.sqlite3
-/staticfiles/ # Archivos estáticos recolectados
-/media/       # Archivos subidos por usuarios
+/staticfiles/
+/media/
 
-# ==================================
-# 5. Editores y Sistemas Operativos
-# ==================================
-.DS_Store # macOS
-Thumbs.db # Windows
-*.swp     # Vim
-
-# IDEs
-.vscode/ # VS Code
-.idea/   # PyCharm
-
+# Archivo con el dataset (si no debe ser público)
 dataset/
+
+# ----------------------------------
+# 5. Editores y Sistemas Operativos
+# ----------------------------------
+# macOS & Windows
+.DS_Store
+Thumbs.db
+
+# IDEs y Editores
+*.swp
+.vscode/
+.idea/
